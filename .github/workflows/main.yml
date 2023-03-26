@@ -24,7 +24,6 @@ env:
   image_definition: ${{ vars.IMAGE_DEFINITION }}
   image_version: ${{ inputs.image_version }}
   winrm_password: ${{ secrets.WINRM_PASSWORD }}
-  default_location: "japaneast"
   location: ${{ vars.LOCATION }}
   replication_regions: ${{ vars.REPLICATION_REGIONS }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
@@ -50,8 +49,8 @@ jobs:
           image_definition = "${{ env.image_definition }}"
           image_version = "${{ env.image_version }}"
           inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
-          location = "${{ env.location || env.default_location }}"
-          replication_regions = ["${{ env.replication_regions || env.default_location }}"]
+          location = "${{ env.location }}"
+          replication_regions = ${{ env.replication_regions }}
           EOT
           cat packer.auto.pkrvars.hcl
 
