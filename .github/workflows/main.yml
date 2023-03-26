@@ -1,0 +1,80 @@
+name: Packer
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  project: ${{ vars.PROJECT }}
+  resource_group_name: ${{ vars.RESOURCE_GROUP_NAME }}
+  vm_size: ${{ vars.VM_SIZE }}
+  gallery_name: ${{ vars.GALLERY_NAME }}
+  image_definition: ${{ vars.IMAGE_DEFINITION }}
+  winrm_password: ${{ secrets.WINRM_PASSWORD }}
+  location: ${{ vars.location || "japaneast" }}
+  replication_regions: ${{ vars.replication_regions || "japaneast" }}
+  keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get runner's Public IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Generate pkrvars file
+        run: |
+          cat <<EOT > packer.auto.pkrvars.hcl
+          project = "${{ env.project }}"
+          resource_group_name = "${{ env.resource_group_name }}"
+          vm_size = "${{ env.vm_size }}"
+          gallery_name = "${{ env.gallery_name }}"
+          image_definition = "${{ env.image_definition }}"
+          image_version = "1.0.${{ github.run_id }}"
+          inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
+          location = "${{ vars.location }}"
+          replication_regions = ["${{ vars.replication_regions }}"]
+          EOT
+          cat packer.auto.pkrvars.hcl
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: packer validate
+        run: packer validate -var 'winrm_password=${{ env.winrm_password }}' .
+
+      - name: packer build
+        run: packer build -var 'winrm_password=${{ env.winrm_password }}' .
+
+      - name: Delete versions of images prior to the specified number
+        uses: Azure/powershell@v1
+        with:
+          inlineScript: |
+            $imageVersions = Get-AzGalleryImageVersion -ResourceGroupName ${{ env.resource_group_name }} -GalleryName ${{ env.gallery_name }} -GalleryImageDefinitionName ${{ env.image_definition }}
+            if ($imageVersions.Count -gt ${{ env.keep_latest_count }}) {
+                $sortedImageVersions = $imageVersions | Sort-Object { $_.PublishingProfile.PublishedDate } -Descending
+                for ($i = ${{ env.keep_latest_count }}; $i -lt $sortedImageVersions.Count; $i++) {
+                    $imageVersion = $sortedImageVersions[$i]
+                    Remove-AzGalleryImageVersion -ResourceGroupName ${{ env.resource_group_name }} -GalleryName ${{ env.gallery_name }} -GalleryImageDefinitionName ${{ env.image_definition }} -Name $imageVersion.Name -Force
+                }
+            }
+          azPSVersion: "latest"
+
+      - name: logout
+        run: |
+          az logout
