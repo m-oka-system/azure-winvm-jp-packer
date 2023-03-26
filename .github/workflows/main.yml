@@ -41,7 +41,7 @@ jobs:
           vm_size = "${{ env.vm_size }}"
           gallery_name = "${{ env.gallery_name }}"
           image_definition = "${{ env.image_definition }}"
-          image_version = "1.0.${{ github.run_id }}"
+          image_version = "1.0.${{ github.run_number }}"
           inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
           location = "${{ env.location || env.default_location }}"
           replication_regions = ["${{ env.replication_regions || env.default_location }}"]
