@@ -18,14 +18,14 @@ permissions:
 
 env:
   project: ${{ vars.PROJECT }}
+  location: ${{ vars.LOCATION }}
   resource_group_name: ${{ vars.RESOURCE_GROUP_NAME }}
   vm_size: ${{ vars.VM_SIZE }}
   gallery_name: ${{ vars.GALLERY_NAME }}
   image_definition: ${{ vars.IMAGE_DEFINITION }}
   image_version: ${{ inputs.image_version }}
-  winrm_password: ${{ secrets.WINRM_PASSWORD }}
-  location: ${{ vars.LOCATION }}
   replication_regions: ${{ vars.REPLICATION_REGIONS }}
+  winrm_password: ${{ secrets.WINRM_PASSWORD }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
 
 jobs:
@@ -43,14 +43,14 @@ jobs:
         run: |
           cat <<EOT > packer.auto.pkrvars.hcl
           project = "${{ env.project }}"
+          location = "${{ env.location }}"
           resource_group_name = "${{ env.resource_group_name }}"
           vm_size = "${{ env.vm_size }}"
           gallery_name = "${{ env.gallery_name }}"
           image_definition = "${{ env.image_definition }}"
           image_version = "${{ env.image_version }}"
-          inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
-          location = "${{ env.location }}"
           replication_regions = ${{ env.replication_regions }}
+          inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
           EOT
           cat packer.auto.pkrvars.hcl
 
