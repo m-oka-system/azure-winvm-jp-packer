@@ -20,11 +20,13 @@
 
    ```
    project              = "MyProject"
+   location             = "japaneast"
    resource_group_name  = "packer-rg"
    vm_size              = "Standard_DS1_v2"
    gallery_name         = "windows_sig"
    image_definition     = "2022-datacenter-smalldisk-g2"
    image_version        = "1.0.0"
+   replication_regions  = ["japaneast"]
    winrm_password       = "P@ssw0rd!"
    inbound_ip_addresses = ["xxx.xxx.xxx.xxx"]
    ```

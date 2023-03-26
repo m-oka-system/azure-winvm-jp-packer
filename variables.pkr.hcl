@@ -4,7 +4,6 @@ variable "project" {
 
 variable "location" {
   type = string
-  default = "japaneast"
 }
 
 variable "resource_group_name" {
@@ -29,7 +28,6 @@ variable "image_version" {
 
 variable "replication_regions" {
   type = list(string)
-  default = ["japaneast"]
 }
 
 variable "winrm_password" {
