@@ -1,10 +1,16 @@
 name: Packer
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
+    inputs:
+      image_version:
+        description: "VM image version name for the semantic version pattern."
+        required: true
+        type: string
+        default: "1.0.0"
 
 permissions:
   id-token: write
@@ -16,6 +22,7 @@ env:
   vm_size: ${{ vars.VM_SIZE }}
   gallery_name: ${{ vars.GALLERY_NAME }}
   image_definition: ${{ vars.IMAGE_DEFINITION }}
+  image_version: ${{ inputs.image_version }}
   winrm_password: ${{ secrets.WINRM_PASSWORD }}
   default_location: "japaneast"
   location: ${{ vars.location }}
@@ -41,7 +48,7 @@ jobs:
           vm_size = "${{ env.vm_size }}"
           gallery_name = "${{ env.gallery_name }}"
           image_definition = "${{ env.image_definition }}"
-          image_version = "1.0.${{ github.run_number }}"
+          image_version = "${{ env.image_version }}"
           inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
           location = "${{ env.location || env.default_location }}"
           replication_regions = ["${{ env.replication_regions || env.default_location }}"]
