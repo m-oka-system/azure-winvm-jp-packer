@@ -1,4 +1,4 @@
-name: Packer
+name: Use Packer to create a Japanese-language image of an Azure Windows VM
 
 on:
   # push:
@@ -25,8 +25,8 @@ env:
   image_version: ${{ inputs.image_version }}
   winrm_password: ${{ secrets.WINRM_PASSWORD }}
   default_location: "japaneast"
-  location: ${{ vars.location }}
-  replication_regions: ${{ vars.replication_regions }}
+  location: ${{ vars.LOCATION }}
+  replication_regions: ${{ vars.REPLICATION_REGIONS }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
 
 jobs:
