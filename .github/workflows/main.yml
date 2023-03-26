@@ -18,8 +18,8 @@ env:
   image_definition: ${{ vars.IMAGE_DEFINITION }}
   winrm_password: ${{ secrets.WINRM_PASSWORD }}
   default_location: "japaneast"
-  location: ${{ vars.location || env.default_location }}
-  replication_regions: ${{ vars.replication_regions || env.default_location }}
+  location: ${{ vars.location }}
+  replication_regions: ${{ vars.replication_regions }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
 
 jobs:
@@ -43,8 +43,8 @@ jobs:
           image_definition = "${{ env.image_definition }}"
           image_version = "1.0.${{ github.run_id }}"
           inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
-          location = "${{ vars.location }}"
-          replication_regions = ["${{ vars.replication_regions }}"]
+          location = "${{ env.location || env.default_location }}"
+          replication_regions = ["${{ env.replication_regions || env.default_location }}"]
           EOT
           cat packer.auto.pkrvars.hcl
 
