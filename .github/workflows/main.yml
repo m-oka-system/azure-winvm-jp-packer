@@ -17,8 +17,9 @@ env:
   gallery_name: ${{ vars.GALLERY_NAME }}
   image_definition: ${{ vars.IMAGE_DEFINITION }}
   winrm_password: ${{ secrets.WINRM_PASSWORD }}
-  location: ${{ vars.location || "japaneast" }}
-  replication_regions: ${{ vars.replication_regions || "japaneast" }}
+  default_location: "japaneast"
+  location: ${{ vars.location || env.default_location }}
+  replication_regions: ${{ vars.replication_regions || env.default_location }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
 
 jobs:
