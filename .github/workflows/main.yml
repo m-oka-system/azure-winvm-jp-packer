@@ -17,15 +17,15 @@ permissions:
   contents: read
 
 env:
-  project: ${{ vars.PROJECT }}
-  location: ${{ vars.LOCATION }}
-  resource_group_name: ${{ vars.RESOURCE_GROUP_NAME }}
-  vm_size: ${{ vars.VM_SIZE }}
-  gallery_name: ${{ vars.GALLERY_NAME }}
-  image_definition: ${{ vars.IMAGE_DEFINITION }}
-  image_version: ${{ inputs.image_version }}
-  replication_regions: ${{ vars.REPLICATION_REGIONS }}
-  winrm_password: ${{ secrets.WINRM_PASSWORD }}
+  PKR_VAR_project: ${{ vars.PROJECT }}
+  PKR_VAR_location: ${{ vars.LOCATION }}
+  PKR_VAR_resource_group_name: ${{ vars.RESOURCE_GROUP_NAME }}
+  PKR_VAR_vm_size: ${{ vars.VM_SIZE }}
+  PKR_VAR_gallery_name: ${{ vars.GALLERY_NAME }}
+  PKR_VAR_image_definition: ${{ vars.IMAGE_DEFINITION }}
+  PKR_VAR_image_version: ${{ inputs.image_version }}
+  PKR_VAR_replication_regions: ${{ vars.REPLICATION_REGIONS }}
+  PKR_VAR_winrm_password: ${{ secrets.WINRM_PASSWORD }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
 
 jobs:
@@ -39,21 +39,6 @@ jobs:
         id: ip
         uses: haythem/public-ip@v1.2
 
-      - name: Generate pkrvars file
-        run: |
-          cat <<EOT > packer.auto.pkrvars.hcl
-          project = "${{ env.project }}"
-          location = "${{ env.location }}"
-          resource_group_name = "${{ env.resource_group_name }}"
-          vm_size = "${{ env.vm_size }}"
-          gallery_name = "${{ env.gallery_name }}"
-          image_definition = "${{ env.image_definition }}"
-          image_version = "${{ env.image_version }}"
-          replication_regions = ${{ env.replication_regions }}
-          inbound_ip_addresses = ["${{ steps.ip.outputs.ipv4 }}"]
-          EOT
-          cat packer.auto.pkrvars.hcl
-
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -63,21 +48,21 @@ jobs:
           enable-AzPSSession: true
 
       - name: packer validate
-        run: packer validate -var 'winrm_password=${{ env.winrm_password }}' .
+        run: packer validate -var 'inbound_ip_addresses=["${{ steps.ip.outputs.ipv4 }}"]' .
 
       - name: packer build
-        run: packer build -var 'winrm_password=${{ env.winrm_password }}' .
+        run: packer build -var 'inbound_ip_addresses=["${{ steps.ip.outputs.ipv4 }}"]' .
 
       - name: Delete versions of images prior to the specified number
         uses: Azure/powershell@v1
         with:
           inlineScript: |
-            $imageVersions = Get-AzGalleryImageVersion -ResourceGroupName ${{ env.resource_group_name }} -GalleryName ${{ env.gallery_name }} -GalleryImageDefinitionName ${{ env.image_definition }}
+            $imageVersions = Get-AzGalleryImageVersion -ResourceGroupName ${{ env.PKR_VAR_resource_group_name }} -GalleryName ${{ env.PKR_VAR_gallery_name }} -GalleryImageDefinitionName ${{ env.PKR_VAR_image_definition }}
             if ($imageVersions.Count -gt ${{ env.keep_latest_count }}) {
                 $sortedImageVersions = $imageVersions | Sort-Object { $_.PublishingProfile.PublishedDate } -Descending
                 for ($i = ${{ env.keep_latest_count }}; $i -lt $sortedImageVersions.Count; $i++) {
                     $imageVersion = $sortedImageVersions[$i]
-                    Remove-AzGalleryImageVersion -ResourceGroupName ${{ env.resource_group_name }} -GalleryName ${{ env.gallery_name }} -GalleryImageDefinitionName ${{ env.image_definition }} -Name $imageVersion.Name -Force
+                    Remove-AzGalleryImageVersion -ResourceGroupName ${{ env.PKR_VAR_resource_group_name }} -GalleryName ${{ env.PKR_VAR_gallery_name }} -GalleryImageDefinitionName ${{ env.PKR_VAR_image_definition }} -Name $imageVersion.Name -Force
                 }
             }
           azPSVersion: "latest"
