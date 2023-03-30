@@ -1,5 +1,5 @@
 locals {
-  timestamp = formatdate("YYYYMMDDhhmmss", timestamp())
+  timestamp = formatdate("YYYYMMDDhhmmss", timeadd(timestamp(), "9h"))
 }
 
 source "azure-arm" "windowsserver-2022" {
