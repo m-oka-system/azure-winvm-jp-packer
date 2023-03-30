@@ -1,5 +1,6 @@
 locals {
   timestamp = formatdate("YYYYMMDDhhmmss", timeadd(timestamp(), "9h"))
+  image_version = formatdate("YYYY.MMDD.hhmm", timeadd(timestamp(), "9h"))
 }
 
 source "azure-arm" "windowsserver-2022" {
@@ -45,7 +46,7 @@ source "azure-arm" "windowsserver-2022" {
     resource_group      = var.resource_group_name
     gallery_name        = var.gallery_name
     image_name          = var.image_definition
-    image_version       = var.image_version
+    image_version       = local.image_version
     replication_regions = var.replication_regions
   }
 }

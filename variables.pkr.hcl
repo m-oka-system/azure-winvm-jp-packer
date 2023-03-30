@@ -22,10 +22,6 @@ variable "image_definition" {
   type = string
 }
 
-variable "image_version" {
-  type = string
-}
-
 variable "replication_regions" {
   type = list(string)
 }

@@ -5,12 +5,12 @@ on:
   #   branches:
   #     - main
   workflow_dispatch:
-    inputs:
-      image_version:
-        description: "VM image version name for the semantic version pattern."
-        required: true
-        type: string
-        default: "1.0.0"
+    # inputs:
+    #   image_version:
+    #     description: "VM image version name for the semantic version pattern."
+    #     required: true
+    #     type: string
+    #     default: "1.0.0"
 
 permissions:
   id-token: write
@@ -23,7 +23,6 @@ env:
   PKR_VAR_vm_size: ${{ vars.VM_SIZE }}
   PKR_VAR_gallery_name: ${{ vars.GALLERY_NAME }}
   PKR_VAR_image_definition: ${{ vars.IMAGE_DEFINITION }}
-  PKR_VAR_image_version: ${{ inputs.image_version }}
   PKR_VAR_replication_regions: ${{ vars.REPLICATION_REGIONS }}
   PKR_VAR_winrm_password: ${{ secrets.WINRM_PASSWORD }}
   keep_latest_count: ${{vars.KEEP_LATEST_COUNT}}
